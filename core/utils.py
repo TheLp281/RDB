@@ -37,6 +37,8 @@ def is_valid_img_url(url):
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2
+
+
 def notify_new_posts(new_imgs, new_hrefs):
     """Send Discord notifications pairing each new image URL with a new post link."""
     webhook_url = os.getenv("DISCORD_WEBHOOK")
@@ -70,15 +72,18 @@ def notify_new_posts(new_imgs, new_hrefs):
                 if response.status_code == 204:
                     logger.info(f"Sent post {index}/{len(paired_posts)} to Discord.")
                     break
+
                 elif response.status_code == 429:
                     retry_after = response.json().get("retry_after", 1000) / 1000
                     logger.warning(
                         f"Rate limited. Retrying in {retry_after:.2f} seconds..."
                     )
                     time.sleep(retry_after + 0.5)
+
                 else:
                     logger.error(
-                        f"Attempt {attempt}: Failed ({response.status_code}) {response.text}"
+                        f"Attempt {attempt}: Failed "
+                        f"({response.status_code}) {response.text}"
                     )
                     time.sleep(RETRY_DELAY)
 
@@ -87,8 +92,9 @@ def notify_new_posts(new_imgs, new_hrefs):
                 time.sleep(RETRY_DELAY)
 
         else:
-            logger.error(f"All attempts failed to send post {index}/{len(paired_posts)}.")
-            
+            val = f"{index}/{len(paired_posts)}"
+            logger.error("All attempts failed to send post " + val)
+
 
 def ensure_data_folder():
     """Create data folder if it does not exist."""

@@ -22,9 +22,11 @@ def save_results(url, site_name, image_file, href_file):
         driver.get(url)
         time.sleep(5)
         parser = None
-        if site_name == "kemono":
+        if site_name == "kemono.su":
             parser = KemonoParser(driver)
-
+        else:
+            logger.error(f"Parser not found for site: {site_name}")
+            return
         img_urls = parser.extract_image_urls()
         hrefs = parser.extract_post_hrefs()
         driver.quit()

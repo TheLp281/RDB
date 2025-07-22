@@ -12,16 +12,10 @@ load_dotenv()
 
 
 def detect_site_from_url(url: str) -> str:
-    """Parses the domain from a URL and returns a normalized site name."""
+    """Extracts and returns the domain (hostname) from a URL."""
     try:
         hostname = urlparse(url).hostname
-        if not hostname:
-            return "unknown"
-
-        known_sites = {"kemono.su": "kemono"}
-
-        return known_sites.get(hostname.lower(), hostname.split(".")[-2])
-
+        return hostname.lower() if hostname else "unknown"
     except Exception as e:
         logger.error(f"Failed to detect site from URL: {e}")
         return "unknown"
@@ -30,15 +24,22 @@ def detect_site_from_url(url: str) -> str:
 if __name__ == "__main__":
     load_dotenv()
 
-    url = os.getenv("TARGET_URL")
-    if not url:
-        logger.error("Error: TARGET_URL not set in .env")
+    urls_string = os.getenv("TARGET_URLS")
+    if not urls_string:
+        logger.error("Error: TARGET_URLS not set in .env")
         exit(1)
 
-    site = detect_site_from_url(url)
-    logger.info(f"Detected site: {site}")
+    urls = [u.strip() for u in urls_string.split(",") if u.strip()]
+    if not urls:
+        logger.error("Error: No valid URLs found in TARGET_URLS")
+        exit(1)
 
-    image_file = f"{site}_images.txt"
-    href_file = f"{site}_hrefs.txt"
+    for url in urls:
+        site = detect_site_from_url(url)
+        logger.info(f"Processing URL: {url}")
+        logger.info(f"Detected site: {site}")
 
-    save_results(url, site, image_file, href_file)
+        image_file = f"{site}_images.txt"
+        href_file = f"{site}_hrefs.txt"
+
+        save_results(url, site, image_file, href_file)
