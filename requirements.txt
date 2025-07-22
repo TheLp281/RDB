@@ -1,0 +1,4 @@
+selenium
+dotenv
+requests
+ruff
